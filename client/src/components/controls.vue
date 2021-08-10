@@ -1,6 +1,6 @@
 <template>
   <ul>
-    <li v-if="!isTouch">
+    <li>
       <i
         :class="[
           shakeKbd ? 'shake' : '',
