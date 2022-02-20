@@ -26,3 +26,16 @@ html, body {
   height: 100vh;
   min-width: 320px;
 }
+
+video::-webkit-media-controls-fullscreen-button
+{
+        display: none !important;
+}
+
+.members {
+    display: none !important;
+}
+
+.header-container {
+    display: none !important;
+}

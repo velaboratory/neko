@@ -22,12 +22,12 @@
           @mouseleave.stop.prevent="onMouseLeave"
         />
         <div v-if="!playing" class="player-overlay">
-          <i @click.stop.prevent="toggle" v-if="playable" class="fas fa-play-circle" />
+          <i @click.stop.prevent="toggle" v-if="playable" class="fas fa-play-circle play" />
         </div>
         <div ref="aspect" class="player-aspect" />
       </div>
       <ul v-if="!fullscreen && !hideControls" class="video-menu top">
-        <li><i @click.stop.prevent="requestFullscreen" class="fas fa-expand"></i></li>
+<!--        <li><i @click.stop.prevent="requestFullscreen" class="fas fa-expand"></i></li>-->
         <li v-if="admin"><i @click.stop.prevent="onResolution" class="fas fa-desktop"></i></li>
         <li class="request-control">
           <i
@@ -386,7 +386,7 @@
         this.onResise()
       })
 
-      this._video.addEventListener('canplaythrough', () => {
+      this._video.addEventListener('canplay', () => {
         this.$accessor.video.setPlayable(true)
         if (this.autoplay) {
           if (this.startsMuted && (!document.hasFocus() || !this.$accessor.active)) {
@@ -428,6 +428,10 @@
         this.$client.sendData('keyup', { key: this.keyMap(key) })
       }
       this.keyboard.listenTo(this._overlay)
+
+      if(this.autoplay && this._video.readyState >= 3) {
+        this.$accessor.video.play()
+      }
     }
 
     beforeDestroy() {
