@@ -67,7 +67,12 @@ export abstract class BaseClient extends EventEmitter<BaseEvents> {
       this._ws.onclose = (event) => this.onDisconnected.bind(this, new Error('websocket closed'))
       this._timeout = window.setTimeout(this.onTimeout.bind(this), 15000)
     } catch (err) {
-      this.onDisconnected(err)
+	    if(err === "string") {
+		this.onDisconnected(new Error(err));
+	    } else if(err instanceof Error) {
+		this.onDisconnected(err);
+	    }
+
     }
   }
 

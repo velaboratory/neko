@@ -215,11 +215,19 @@
 
         this.autoPassword = null
       } catch (err) {
-        this.$swal({
-          title: this.$t('connect.error') as string,
-          text: err.message,
-          icon: 'error',
-        })
+	if(typeof err === "string") {
+        	this.$swal({
+	          title: this.$t('connect.error') as string,
+	          text: err,
+        	  icon: 'error',
+	        })
+	} else if (err instanceof Error) {
+	        this.$swal({
+	          title: this.$t('connect.error') as string,
+        	  text: err.message,
+	          icon: 'error',
+        	})
+	}
       }
     }
 

@@ -499,7 +499,11 @@
           })
           .catch((err) => this.$log.error)
       } catch (err) {
-        this.$log.error(err)
+	if(err === "string") {
+        	this.$log.error(new Error(err))
+	} else if(err instanceof Error) {
+        	this.$log.error(err)
+	}
       }
     }
 
