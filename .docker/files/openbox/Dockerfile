@@ -1,4 +1,4 @@
-FROM nurdism/neko:base
+FROM brookbowersuga/vel-neko:base
 
 #
 # install openbox

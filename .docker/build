@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# sudo docker run -p 80:8080 -p 59000-59100:59000-59100/udp --cap-add SYS_ADMIN --shm-size=1gb nurdism/neko:chromium 
-# sudo docker run -p 80:8080 -p 59000-59100:59000-59100/udp --shm-size=1gb nurdism/neko:firefox
-# sudo docker run --network host --shm-size=1gb -it nurdism/neko:base /bin/bash
+# sudo docker run -p 80:8080 -p 59000-59100:59000-59100/udp --cap-add SYS_ADMIN --shm-size=1gb brookbowersuga/vel-neko:chromium 
+# sudo docker run -p 80:8080 -p 59000-59100:59000-59100/udp --shm-size=1gb brookbowersuga/vel-neko:firefox
+# sudo docker run --network host --shm-size=1gb -it brookbowersuga/vel-neko:base /bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )/.."
 
@@ -44,17 +44,17 @@ build_base() {
   set -eux; \
     cd $DIR/server; go get -v -t -d . ; ./build; \
     cd $DIR/client; npm install; npm run build; \
-    cd $DIR; sudo docker build -f .docker/files/base/Dockerfile -t nurdism/neko:base . ;
+    cd $DIR; sudo docker build -f .docker/files/base/Dockerfile -t brookbowersuga/vel-neko:base . ;
 }
 
 build_latest() {
   set -eux; \
-   cd $DIR; sudo docker build -f .docker/files/$1/Dockerfile -t nurdism/neko:latest . ; 
+   cd $DIR; sudo docker build -f .docker/files/$1/Dockerfile -t brookbowersuga/vel-neko:latest . ; 
 }
 
 build_image() {
   set -eux; \
-    cd $DIR; sudo docker build -f .docker/files/$1/Dockerfile -t nurdism/neko:$1 . ; 
+    cd $DIR; sudo docker build -f .docker/files/$1/Dockerfile -t brookbowersuga/vel-neko:$1 . ; 
 }
 
 build() {
@@ -70,28 +70,28 @@ build() {
       build_image "base"; \
       build_base; \
       build_image "openbox"; \
-      build_image "xfce4"; \
-      build_image "jwm"; \
+#      build_image "xfce4"; \
+#      build_image "jwm"; \
       build_image "firefox"; \
-      build_image "chromium"; \
-      build_image "tor-browser";
+#      build_image "chromium"; \
+#      build_image "tor-browser";
   fi
 
-  sudo docker images nurdism/neko 
+  sudo docker images brookbowersuga/vel-neko 
 }
 
 push() {
   if [ $1 != "" ]; then
-    sudo docker push nurdism/neko:$1
+    sudo docker push brookbowersuga/vel-neko:$1
   else
-    sudo docker push nurdism/neko:deps 
-    sudo docker push nurdism/neko:base 
-    sudo docker push nurdism/neko:openbox 
-    sudo docker push nurdism/neko:xfce4 
-    sudo docker push nurdism/neko:jwm 
-    sudo docker push nurdism/neko:firefox 
-    sudo docker push nurdism/neko:chromium 
-    sudo docker push nurdism/neko:tor-browser 
+    sudo docker push brookbowersuga/vel-neko:deps 
+    sudo docker push brookbowersuga/vel-neko:base 
+    sudo docker push brookbowersuga/vel-neko:openbox 
+    sudo docker push brookbowersuga/vel-neko:xfce4 
+    sudo docker push brookbowersuga/vel-neko:jwm 
+    sudo docker push brookbowersuga/vel-neko:firefox 
+    sudo docker push brookbowersuga/vel-neko:chromium 
+    sudo docker push brookbowersuga/vel-neko:tor-browser 
   fi
 }
 

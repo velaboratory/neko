@@ -1,4 +1,4 @@
-FROM nurdism/neko:openbox
+FROM brookbowersuga/vel-neko:openbox
 
 #
 # install firefox-esr
