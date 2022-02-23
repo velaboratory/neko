@@ -21,8 +21,16 @@
           @mouseenter.stop.prevent="onMouseEnter"
           @mouseleave.stop.prevent="onMouseLeave"
         />
+<<<<<<< HEAD
         <div v-if="!playing" class="player-overlay">
           <i @click.stop.prevent="toggle" v-if="playable" class="fas fa-play-circle play" />
+=======
+        <div v-if="!playing && playable" class="player-overlay" @click.stop.prevent="toggle">
+          <i class="fas fa-play-circle" />
+        </div>
+        <div v-if="mutedOverlay && muted" class="player-overlay" @click.stop.prevent="unmute">
+          <i class="fas fa-volume-up" />
+>>>>>>> a213ae400a7c5ec1bc1531c6d2b3aa60b4359de9
         </div>
         <div ref="aspect" class="player-aspect" />
       </div>
@@ -151,13 +159,11 @@
           display: flex;
           justify-content: center;
           align-items: center;
+          cursor: pointer;
 
-          i {
-            cursor: pointer;
-            &::before {
-              font-size: 120px;
-              text-align: center;
-            }
+          i::before {
+            font-size: 120px;
+            text-align: center;
           }
 
           &.hidden {
@@ -213,13 +219,14 @@
     @Ref('resolution') readonly _resolution!: any
     @Ref('clipboard') readonly _clipboard!: any
 
-    @Prop(Boolean) readonly hideControls = false
+    @Prop(Boolean) readonly hideControls!: boolean
 
     private keyboard = GuacamoleKeyboard()
     private observer = new ResizeObserver(this.onResise.bind(this))
     private focused = false
     private fullscreen = false
     private startsMuted = true
+    private mutedOverlay = true
 
     get admin() {
       return this.$accessor.user.admin
@@ -330,16 +337,22 @@
 
     @Watch('volume')
     onVolumeChanged(volume: number) {
-      if (this._video) {
-        this._video.volume = this.volume / 100
+      volume /= 100
+
+      if (this._video && this._video.volume != volume) {
+        this._video.volume = volume
       }
     }
 
     @Watch('muted')
     onMutedChanged(muted: boolean) {
-      if (this._video) {
+      if (this._video && this._video.muted != muted) {
         this._video.muted = muted
         this.startsMuted = muted
+
+        if (!muted) {
+          this.mutedOverlay = false
+        }
       }
     }
 
@@ -359,9 +372,11 @@
 
     @Watch('playing')
     onPlayingChanged(playing: boolean) {
-      if (playing) {
+      if (this._video && this._video.paused && playing) {
         this.play()
-      } else {
+      }
+
+      if (this._video && !this._video.paused && !playing) {
         this.pause()
       }
     }
@@ -376,6 +391,7 @@
     mounted() {
       this._container.addEventListener('resize', this.onResise)
       this.onVolumeChanged(this.volume)
+      this.onMutedChanged(this.muted)
       this.onStreamChanged(this.stream)
       this.onResise()
 
@@ -389,9 +405,9 @@
       this._video.addEventListener('canplay', () => {
         this.$accessor.video.setPlayable(true)
         if (this.autoplay) {
+          // start as muted due to restrictive browsers autoplay policy
           if (this.startsMuted && (!document.hasFocus() || !this.$accessor.active)) {
             this.$accessor.video.setMuted(true)
-            this._video.muted = true
           }
 
           this.$nextTick(() => {
@@ -407,6 +423,19 @@
       this._video.addEventListener('error', (event) => {
         this.$log.error(event.error)
         this.$accessor.video.setPlayable(false)
+      })
+
+      this._video.addEventListener('volumechange', (event) => {
+        this.$accessor.video.setMuted(this._video.muted)
+        this.$accessor.video.setVolume(this._video.volume * 100)
+      })
+
+      this._video.addEventListener('playing', () => {
+        this.$accessor.video.play()
+      })
+
+      this._video.addEventListener('pause', () => {
+        this.$accessor.video.pause()
       })
 
       document.addEventListener('focusin', this.onFocus.bind(this))
@@ -486,24 +515,16 @@
       return key
     }
 
-    play() {
+    async play() {
       if (!this._video.paused || !this.playable) {
         return
       }
 
       try {
-        this._video
-          .play()
-          .then(() => {
-            this.onResise()
-          })
-          .catch((err) => this.$log.error)
-      } catch (err) {
-	if(err === "string") {
-        	this.$log.error(new Error(err))
-	} else if(err instanceof Error) {
-        	this.$log.error(err)
-	}
+        await this._video.play()
+        this.onResise()
+      } catch (err: any) {
+        this.$log.error(err)
       }
     }
 
@@ -525,6 +546,10 @@
       } else {
         this.$accessor.video.pause()
       }
+    }
+
+    unmute() {
+      this.$accessor.video.setMuted(false)
     }
 
     toggleControl() {
@@ -577,21 +602,21 @@
       this.onResise()
     }
 
-    onFocus() {
+    async onFocus() {
       if (!document.hasFocus() || !this.$accessor.active) {
         return
       }
 
       if (this.hosting && this.clipboard_read_available) {
-        navigator.clipboard
-          .readText()
-          .then((text) => {
-            if (this.clipboard !== text) {
-              this.$accessor.remote.setClipboard(text)
-              this.$accessor.remote.sendClipboard(text)
-            }
-          })
-          .catch(this.$log.error)
+        try {
+          const text = await navigator.clipboard.readText()
+          if (this.clipboard !== text) {
+            this.$accessor.remote.setClipboard(text)
+            this.$accessor.remote.sendClipboard(text)
+          }
+        } catch (err: any) {
+          this.$log.error(err)
+        }
       }
     }
 
