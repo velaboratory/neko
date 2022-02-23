@@ -1,5 +1,5 @@
 FROM debian:stretch-slim
-
+ENV DEBIAN_FRONTEND=noninteractive
 #
 # cluster fuck of packages for neko, node, go and gstreamer
 RUN set -eux; apt-get update; apt-get install -y --no-install-recommends \
@@ -79,6 +79,8 @@ RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
     ; do \
       gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" || \
       gpg --batch --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "$key" || \
+      gpg --batch --keyserver hkps://keyserver.ubuntu.com --recv-keys "$key" || \
+      gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys "$key" || \
       gpg --batch --keyserver hkp://pgp.mit.edu:80 --recv-keys "$key" ; \
     done \
     && curl -fsSLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-$ARCH.tar.xz" \
@@ -187,5 +189,5 @@ ENV GO111MODULE=on
 # install docker
 RUN set -eux; \
     curl -fsSL https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]')/gpg | (OUT=$(apt-key add - 2>&1) || echo $OUT); \
-    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]') $(lsb_release -cs) stable"; \
-    apt-get update; apt-get install -y docker-ce-cli;
+    add-apt-repository "deb [arch=linux/arm] https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]') $(lsb_release -cs) stable"; \
+    apt-get update; apt-get install -y docker;

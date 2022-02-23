@@ -1,8 +1,8 @@
 version: "3.4"
 services:
   neko:
-    build: .m1k1o/chromium
-    container_name: neko_chromium
+    build: brookbowersuga/vel-neko:firefox
+    container_name: firefox
     restart: always
     shm_size: "3gb"
     ports:

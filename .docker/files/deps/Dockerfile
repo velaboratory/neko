@@ -18,6 +18,6 @@ ENV PKG_CONFIG_PATH=/gst/local/lib/pkgconfig:$PKG_CONFIG_PATH
 
 #
 # copy gst
-#COPY .build/gst/local /gst/local/
+COPY .build/gst/local/ /gst/local/
 COPY .docker/files/deps/dbus /usr/bin/dbus
 COPY .docker/files/deps/default.pa /etc/pulse/default.pa
